@@ -209,9 +209,14 @@ export default app;
 
 // Only start server if not running in serverless environment
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
-  server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on PORT: ${PORT}`)
+  connectDB().then(() => {
+    dbReady = true;
+    server.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server is running on PORT: ${PORT}`)
+    })
+    startRoomExpiryScheduler(io)
+  }).catch((err) => {
+    console.error('Failed to connect to MongoDB, server not started:', err)
+    process.exit(1)
   })
-  // start expiry scheduler
-  startRoomExpiryScheduler(io)
 }
